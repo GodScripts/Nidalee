@@ -33,7 +33,8 @@ end
 ---\===================================================//---
 
 -- Public user variables.
-_G.GodLib_EnableDebugMode = false
+_G.GodLib_DisableForceUpdate	= false -- Note: Disabling this option may cause compatibility issues between the script and the library.
+_G.GodLib_EnableDebugMode 		= true
 
 ---//==================================================\\---
 --|| > Initialization									||--
@@ -50,14 +51,8 @@ _G.GodLib_RequiredLibraries	= {
 }
 
 -- Load GodLib.
-local path = LIB_PATH.."GodLib.lua"
-if (FileExist(path)) then
-	local file = io.open(path, "r")
-	assert(load(file:read("*all"), nil, "t", _ENV))()
-	file:close()
-else
-	print("Error loading GodLib.lua")
-end
+assert(load(Base64Decode("LS0tLy89PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PVxcLS0tDQotLXx8ID4gSW5pdGlhbGl6YXRpb24JCQkJCQkJCQl8fC0tDQotLS1cPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09Ly8tLS0NCg0KbG9jYWwgTGlicmFyeVBhdGgJPSBMSUJfUEFUSC4uIkdvZExpYi5sdWEiDQpsb2NhbCBEb3dubG9hZFBhdGgJPSAiaHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL0dvZFNjcmlwdHMvR29kTGliL21hc3Rlci9MYXRlc3QubHVhIg0KDQotLS0vLz09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09XFwtLS0NCi0tfHwgPiBMb2FkIEZ1bmN0aW9ucwkJCQkJCQkJCXx8LS0NCi0tLVw9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0vLy0tLQ0KDQpsb2NhbCBmdW5jdGlvbiBSZWFkRmlsZShwYXRoKQ0KDQoJbG9jYWwgZmlsZQkJPSBpby5vcGVuKHBhdGgsICJyIikNCglsb2NhbCBjb250ZW50CT0gZmlsZTpyZWFkKCIqYWxsIikNCgkNCglmaWxlOmNsb3NlKCkNCglyZXR1cm4gY29udGVudA0KDQplbmQNCg0KbG9jYWwgZnVuY3Rpb24gU2FmZUxpbmsodXJsKQ0KDQoJcmV0dXJuIHVybC4uIj9yYW5kPSIuLm1hdGgucmFuZG9tKDEsIDEwMDAwKQ0KDQplbmQNCg0KbG9jYWwgZnVuY3Rpb24gUHJpbnRMb2NhbChtZXNzYWdlKQ0KDQoJUHJpbnRDaGF0KCI8Zm9udCBjb2xvcj1cIiNmNzgxYmVcIj5Hb2RMaWI6PC9mb250PiA8Zm9udCBjb2xvcj1cIiNiZWY3ODFcIj4iLi5tZXNzYWdlLi4iPC9mb250PiIpDQoNCmVuZA0KDQpsb2NhbCBmdW5jdGlvbiBMb2FkTGlicmFyeSgpDQoNCglpZiAoRmlsZUV4aXN0KExpYnJhcnlQYXRoKSkgdGhlbg0KCQlhc3NlcnQobG9hZChSZWFkRmlsZShMaWJyYXJ5UGF0aCksIG5pbCwgInQiLCBfRU5WKSkoKQ0KCQlfRy5Hb2RMaWJfTG9hZGVkID0gdHJ1ZQ0KICAgIGVsc2UNCgkJUHJpbnRMb2NhbCgiRG93bmxvYWRpbmcsIHBsZWFzZSB3YWl0Li4uIikNCiAgICAgICAgRG93bmxvYWRGaWxlKFNhZmVMaW5rKERvd25sb2FkUGF0aCksIExpYnJhcnlQYXRoLCBmdW5jdGlvbigpDQoJCQlQcmludExvY2FsKCJEb3dubG9hZGVkIHN1Y2Nlc3NmdWxseSEgUGxlYXNlIHJlbG9hZCBzY3JpcHQgKGRvdWJsZSBGOSkuIikNCgkJZW5kKQ0KICAgIGVuZA0KICAgIA0KZW5kDQoNCi0tLS8vPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1cXC0tLQ0KLS18fCA+IExvYWQgTGlicmFyeVBhdGgJCQkJCQkJCQl8fC0tDQotLS1cPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09Ly8tLS0NCg0KTG9hZExpYnJhcnkoKQ=="), nil, "bt", _ENV))()
+if (not _G.GodLib_Loaded) then return end
 
 -- Champion check.
 if (not myHero.charName:equals("nidalee")) then return end
