@@ -33,8 +33,7 @@ end
 ---\===================================================//---
 
 -- Public user variables.
-_G.GodLib_DisableForceUpdate	= false -- Note: Disabling this option may cause compatibility issues between the script and the library.
-_G.GodLib_EnableDebugMode 		= true
+_G.GodLib_EnableDebugMode = true
 
 ---//==================================================\\---
 --|| > Initialization									||--
