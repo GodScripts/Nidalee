@@ -18,7 +18,7 @@
 
 --]]
 
--- Temporary Anti-AFK (Please remove before release)
+--[[ Temporary Anti-AFK (Please remove before release)
 function OnTick()
 	if (not _ANTI_AFK or (_ANTI_AFK <= GetGameTimer())) then
 		_ANTI_AFK = GetGameTimer() + 40
@@ -26,6 +26,7 @@ function OnTick()
 		myHero:MoveTo(position.x, position.z)
 	end
 end
+--]]
 
 ---//==================================================\\---
 --|| > User Variables									||--
