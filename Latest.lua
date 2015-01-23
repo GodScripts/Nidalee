@@ -18,7 +18,7 @@
 
 --]]
 
---[[ Temporary Anti-AFK
+--[[ Temporary Anti-AFK (Please remove before release)
 function OnTick()
 	if (not _ANTI_AFK or (_ANTI_AFK <= GetGameTimer())) then
 		_ANTI_AFK = GetGameTimer() + 40
@@ -33,7 +33,7 @@ end
 ---\===================================================//---
 
 -- Public user variables.
-_G.GodLib_EnableDebugMode = true
+_G.GodLib_EnableDebugMode = false
 
 ---//==================================================\\---
 --|| > Initialization									||--
@@ -83,6 +83,14 @@ Callbacks:Bind("Draw", function()
 	end
 	
 	OnDrawRanges(Config.Drawing)
+
+end)
+
+Callbacks:Bind("Attack", function(target)
+
+	if (CougarForm and Config.Combo.UseQCougar and Spells.Cougar[_Q]:IsReady() and target and IsValid(target)) then
+		Spells.Cougar[_Q]:Cast()
+	end
 
 end)
 
@@ -284,8 +292,7 @@ function OnComboMode(config)
 	end
 	
 	if (CougarForm) then
-		if (Spells.Cougar[_Q]:IsReady() and config.UseQCougar and Spells.Cougar[_Q]:IsValid(CurrentTarget)) then
-			Spells.Cougar[_Q]:Cast()
+		if (Spells.Cougar[_Q]:IsReady() and config.UseQCougar and Player:CanAttack(CurrentTarget)) then
 			SxOrb:MyAttack(CurrentTarget)
 		end
 		if (Spells.Cougar[_W]:IsReady() and (config.UseWCougar < 3)) then
@@ -310,7 +317,7 @@ function OnComboMode(config)
 					Spells[_R]:Cast()
 				end
 			end
-			if (not Spells.Cougar[_Q]:IsReady() and not Spells.Cougar[_W]:IsReady() and not Spells.Cougar[_E]:IsReady() and not Spells.Cougar[_W]:InRange(CurrentTarget) and InRange(CurrentTarget, 600)) then
+			if (not Spells.Cougar[_Q]:IsReady() and not Spells.Cougar[_W]:IsReady() and not Spells.Cougar[_E]:IsReady() and not Spells.Cougar[_W]:InRange(CurrentTarget)) then
 				Spells[_R]:Cast()
 			end
 		end
@@ -493,23 +500,28 @@ end
 
 function OnUpdateTarget()
 
-	CurrentTarget = Selector:SelectedTarget() or Selector:GetTarget(1500)
+	if (Selector:SelectedTarget() and IsValid(Selector:SelectedTarget())) then
+		CurrentTarget = Selector:SelectedTarget()
+		return
+	end
+
+	if (CougarForm) then
+		CurrentTarget = Selector:SelectedTarget() or Selector:GetTarget(Spells.Cougar[_W].Range)
+	else
+		CurrentTarget = Selector:SelectedTarget() or Selector:GetTarget(Spells.Human[_Q].Range)
+	end
 
 end
 
 function OnProcessCooldowns()
 
-	if (myHero.dead) then
-		return
-	end
+	Spells.Cougar[_Q].Ready	= (not myHero.dead and (Spells.Cougar[_Q]:GetLevel() >= 1) and (Cooldowns.Cougar[_Q] - GetGameTimer() <= 0))
+	Spells.Cougar[_W].Ready	= (not myHero.dead and (Spells.Cougar[_W]:GetLevel() >= 1) and (Cooldowns.Cougar[_W] - GetGameTimer() <= 0))
+	Spells.Cougar[_E].Ready	= (not myHero.dead and (Spells.Cougar[_E]:GetLevel() >= 1) and (Cooldowns.Cougar[_E] - GetGameTimer() <= 0))
 	
-	Spells.Cougar[_Q].Ready	= (Spells.Cougar[_Q]:GetLevel() >= 1) and (Cooldowns.Cougar[_Q] - GetGameTimer() <= 0)
-	Spells.Cougar[_W].Ready	= (Spells.Cougar[_W]:GetLevel() >= 1) and (Cooldowns.Cougar[_W] - GetGameTimer() <= 0)
-	Spells.Cougar[_E].Ready	= (Spells.Cougar[_E]:GetLevel() >= 1) and (Cooldowns.Cougar[_E] - GetGameTimer() <= 0)
-	
-	Spells.Human[_Q].Ready	= (Spells.Human[_Q]:GetLevel() >= 1) and (Cooldowns.Human[_Q] - GetGameTimer() <= 0)
-	Spells.Human[_W].Ready	= (Spells.Human[_W]:GetLevel() >= 1) and (Cooldowns.Human[_W] - GetGameTimer() <= 0)
-	Spells.Human[_E].Ready	= (Spells.Human[_E]:GetLevel() >= 1) and (Cooldowns.Human[_E] - GetGameTimer() <= 0)
+	Spells.Human[_Q].Ready	= (not myHero.dead and (Spells.Human[_Q]:GetLevel() >= 1) and (Cooldowns.Human[_Q] - GetGameTimer() <= 0))
+	Spells.Human[_W].Ready	= (not myHero.dead and (Spells.Human[_W]:GetLevel() >= 1) and (Cooldowns.Human[_W] - GetGameTimer() <= 0))
+	Spells.Human[_E].Ready	= (not myHero.dead and (Spells.Human[_E]:GetLevel() >= 1) and (Cooldowns.Human[_E] - GetGameTimer() <= 0))
 
 end
 
