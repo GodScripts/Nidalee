@@ -18,7 +18,7 @@
 
 --]]
 
---[[ Temporary Anti-AFK (Please remove before release)
+-- Temporary Anti-AFK (Please remove before release)
 function OnTick()
 	if (not _ANTI_AFK or (_ANTI_AFK <= GetGameTimer())) then
 		_ANTI_AFK = GetGameTimer() + 40
@@ -26,7 +26,6 @@ function OnTick()
 		myHero:MoveTo(position.x, position.z)
 	end
 end
---]]
 
 ---//==================================================\\---
 --|| > User Variables									||--
@@ -142,7 +141,6 @@ function SetupVariables()
 	
 	TickManager:Add("Combo", "Combo Mode", 100, function() OnComboMode(Config.Combo) end)
 	TickManager:Add("Harass", "Harass Mode", 100, function() OnHarassMode(Config.Harass) end)
-	TickManager:Add("Heal", "Auto-Heal", 100, function() OnAutoHeal(Config.Heal) end)
 	TickManager:Add("Killsteal", "Killsteal", 100, function() OnKillsteal(Config.Killstealing) end)
 	TickManager:Add("UpdateTarget", "Update Current Target", 100, OnUpdateTarget)
 	TickManager:Add("UpdateCougarForm", "Update Cougar Form", 100, OnUpdateCougarForm)
@@ -182,7 +180,7 @@ function SetupConfig()
 	Config:Info("Build Date", ScriptDate)
 	Config:Info("Author", "Devn")
 	
-	SxOrb:LoadToMenu(Config.Orbwalker, true, true)
+	SxOrb:LoadToMenu(Config.Orbwalker, true, false)
 	Selector:LoadToMenu(Config.Selector)
 	SetupConfig_Combo(Config.Combo)
 	SetupConfig_Harass(Config.Harass)
