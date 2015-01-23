@@ -18,7 +18,7 @@
 
 --]]
 
---[[ Temporary Anti-AFK (Please remove before release)
+-- Temporary Anti-AFK (Please remove before release)
 function OnTick()
 	if (not _ANTI_AFK or (_ANTI_AFK <= GetGameTimer())) then
 		_ANTI_AFK = GetGameTimer() + 40
@@ -26,7 +26,6 @@ function OnTick()
 		myHero:MoveTo(position.x, position.z)
 	end
 end
---]]
 
 ---//==================================================\\---
 --|| > User Variables									||--
@@ -572,7 +571,7 @@ Callbacks:Bind("Overrides", function()
 
 	function SxOrb:GetTarget(range)
 	
-		return self:ValidTarget(CurrentTarget, range) or Selector:GetTarget(Player:GetRange())
+		return (self:ValidTarget(CurrentTarget, range) and CurrentTarget) or Selector:GetTarget(Player:GetRange())
 	
 	end
 
