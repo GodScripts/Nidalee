@@ -55,7 +55,7 @@ GodLib_Setup.RequiredLibraries	= {
 }
 
 -- Initialize GodLib script.
-GodLib_Setup:Initialize("nidalee")
+Initialize("nidalee")
 
 ---//==================================================\\---
 --|| > Callback Handlers								||--
