@@ -5,7 +5,7 @@
 ---\===================================================//---
 
 	Script:			Nidalee - The Bestial God
-	Version:		1.00
+	Version:		1.01
 	Script Date:	2015-01-23
 	Author:			Devn
 
@@ -15,6 +15,12 @@
 
 	Version 1.00:
 		- Initial script release.
+		
+	Version 1.01:
+		- Changed around pounce logic for combo mode.
+		- Changed form swapping logic for combo mode.
+		- Fixed killstealing during cougar mode.
+		- Add key for ScriptStatus.net.
 
 --]]
 
@@ -46,8 +52,9 @@ if (not GodLib_Setup.Loaded) then return end
 -- Script variables.
 GodLib_Setup.ScriptTitle		= "Nidalee - The Bestial God"
 GodLib_Setup.ScriptName 		= "Nidalee"
-GodLib_Setup.ScriptVersion		= "1.00"
+GodLib_Setup.ScriptVersion		= "1.01"
 GodLib_Setup.ScriptDate			= "2015-01-23"
+GodLib_Setup.StatusKey			= "PCFDDBHBJEE"
 
 -- Required libraries.
 GodLib_Setup.RequiredLibraries	= {
@@ -89,7 +96,7 @@ end)
 
 Callbacks:Bind("Attack", function(target)
 
-	if (CougarForm and Config.Combo.UseQCougar and Spells.Cougar[_Q]:IsReady() and target and IsValid(target)) then
+	if (CougarForm and Config.Combo.Active and Config.Combo.UseQCougar and Spells.Cougar[_Q]:IsReady() and target and IsValid(target)) then
 		Spells.Cougar[_Q]:Cast()
 	end
 
@@ -129,11 +136,11 @@ function SetupVariables()
 	}
 	
 	CurrentTarget	= nil
-	
 	CougarForm		= false
 	
 	Config			= MenuConfig(ScriptName, ScriptTitle)
 	Selector		= SimpleTS(STS_LESS_CAST)
+	Debugger		= VisualDebugger()
 	
 	Spells.Human[_Q]:SetSkillshot(SKILLSHOT_LINEAR, 40, 0.5, 1300, true)
 	Spells.Human[_W]:SetSkillshot(SKILLSHOT_CIRCULAR, 100, 0.5, 1500, false)
@@ -265,11 +272,13 @@ function OnComboMode(config)
 	end
 	
 	if (CougarForm) then
-		if (Spells.Cougar[_Q]:IsReady() and config.UseQCougar and Player:CanAttack(CurrentTarget)) then
+		if (Spells.Cougar[_Q]:IsReady() and config.UseQCougar and Spells.Cougar[_Q]:InRange(CurrentTarget)) then
+			Spells.Cougar[_Q]:Cast()
 			SxOrb:MyAttack(CurrentTarget)
 		end
 		if (Spells.Cougar[_W]:IsReady() and (config.UseWCougar < 3)) then
 			if ((config.UseWCougar == 1) or ((config.UseWCougar == 2) and not InRange(CurrentTarget, Player:GetRange(CurrentTarget)))) then
+				--Spells.Cougar[_W]:CastAt(CurrentTarget)
 				if (Spells.Cougar[_W]:InRange(CurrentTarget)) then
 					Spells.Cougar[_W]:CastAt(CurrentTarget)
 				elseif (TargetHunted(CurrentTarget) and InRange(CurrentTarget, 750)) then
@@ -295,15 +304,6 @@ function OnComboMode(config)
 			end
 		end
 	else
-		if (Spells[_R]:IsReady() and config.UseR and (TargetHunted(CurrentTarget) or ((CurrentTarget.health <= CougarDamage(CurrentTarget)) and (Cooldowns.Human[_Q] > 0)))) then
-			if (Spells.Cougar[_W].Ready and TargetHunted(CurrentTarget) and InRange(CurrentTarget, 750)) then
-				Spells[_R]:Cast()
-			elseif (Spells.Cougar[_W].Ready and (CurrentTarget.health <= CougarDamage(CurrentTarget)) and InRange(CurrentTarget, 350)) then
-				Spells[_R]:Cast()
-			elseif (InRange(CurrentTarget, Player:GetRange(CurrentTarget))) then
-				Spells[_R]:Cast()
-			end
-		end
 		if (Spells.Human[_Q]:IsReady() and config.UseQHuman and Spells.Human[_Q]:IsValid(CurrentTarget)) then
 			Spells.Human[_Q]:Cast(CurrentTarget)
 		end
@@ -312,6 +312,35 @@ function OnComboMode(config)
 				Spells.Human[_W]:Cast(CurrentTarget)
 			elseif (config.UseWHuman == 2) then
 				Spells.Human[_W]:CastIfImmobile(CurrentTarget)
+			end
+		end
+		if (Spells[_R]:IsReady() and config.UseR) then
+			local first = false
+			local swap = false
+			if (Spells.Human[_Q]:IsReady()) then
+				local _, hitchance, _ = Spells.Human[_Q]:GetPrediction(CurrentTarget)
+				if (hitchance < 2) then
+					first = true
+				end
+			else
+				first = true
+			end
+			if (first) then
+				if (Spells.Cougar[_W].Ready) then
+					if (not TargetHunted(CurrentTarget) and Spells.Cougar[_W]:InRange(CurrentTarget)) then
+						swap = true
+					elseif (InRange(CurrentTarget, 750)) then
+						swap = true
+					end
+				end
+				if (Spells.Cougar[_Q].Ready and Spells.Cougar[_Q]:InRange(CurrentTarget)) then
+					swap = true
+				elseif (Spells.Cougar[_E].Ready and Spells.Cougar[_E]:InRange(CurrentTarget)) then
+					swap = true
+				end
+				if (swap) then
+					Spells[_R]:Cast()
+				end
 			end
 		end
 	end
@@ -339,7 +368,8 @@ function OnKillsteal(config)
 	for _, enemy in ipairs(GetEnemyHeroes()) do
 		if (enemy and not enemy.dead and Spells.Human[_Q]:IsValid(enemy)) then
 			local damage = getDmg("Q", enemy, myHero)
-			if (not CougarForm) then
+			local damageA = getDmg("AD", enemy, myHero)
+			if (CougarForm) then
 				local damageQ = getDmg("QM", enemy, myHero)
 				local damageW = getDmg("WM", enemy, myHero)
 				local damageE = getDmg("EM", enemy, myHero)
@@ -353,6 +383,13 @@ function OnKillsteal(config)
 				elseif ((enemy.health <= damageW) and Spells.Cougar[_W]:IsReady() and Spells.Cougar[_W]:IsValid(enemy)) then
 					Spells.Cougar[_W]:CastAt(enemy)
 					return
+				elseif ((enemy.health <= damageA) and not InRange(enemy, Player:GetRange(enemy)) and InRange(enemy, 600)) then
+					Spells[_R]:Cast()
+					return
+				end
+			else
+				if ((enemy.health <= damageA) and InRange(enemy, Player:GetRange(enemy))) then
+					SxOrb:MyAttack(enemy)
 				end
 			end
 			if (enemy.health <= damage) then
@@ -361,8 +398,9 @@ function OnKillsteal(config)
 						Spells.Human[_Q]:Cast(enemy)
 						return
 					end
-				elseif (Spells[_R]:IsReady()) then
-					if (Spells.Human[_Q].Ready) then
+				elseif (Spells[_R]:IsReady() and Spells.Human[_Q].Ready) then
+					local _, hitchance, _ = Spells.Human[_Q]:GetPrediction(CurrentTarget)
+					if (hitchance >= 2) then
 						Spells[_R]:Cast()
 						return
 					end
@@ -441,16 +479,7 @@ end
 
 function OnUpdateTarget()
 
-	if (Selector:SelectedTarget() and IsValid(Selector:SelectedTarget())) then
-		CurrentTarget = Selector:SelectedTarget()
-		return
-	end
-
-	if (CougarForm) then
-		CurrentTarget = Selector:SelectedTarget() or Selector:GetTarget(Spells.Cougar[_W].Range)
-	else
-		CurrentTarget = Selector:SelectedTarget() or Selector:GetTarget(Spells.Human[_Q].Range)
-	end
+	CurrentTarget = Selector:SelectedTarget() or Selector:GetTarget(Spells.Human[_Q].Range)
 
 end
 
